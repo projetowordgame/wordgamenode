@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Req, Res } from '@nestjs/common';
+import { Controller, Post, Body, Req, Res, Put, Get, Delete, Param } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { UserService } from '../user/user.service';
 import { Response } from 'express';
@@ -10,6 +10,29 @@ export class AuthController {
   @Post('register')
   async register(@Body() body: { name: string, email: string; password: string }) {
     return this.userService.createUser(body.name, body.email, body.password);
+  }
+
+  @Put('update')
+  async updateUser(@Body() body: { id: number, name: string, email: string; password: string }) {
+    return this.userService.update(body.id, body.name, body.email, body.password);
+  }
+
+  @Get('profile')
+  async getProfile(@Req() req) {
+    const token = req.headers.authorization?.split(' ')[1]; // 🔹 Remove "Bearer"
+    return this.authService.getUserFromToken(token);
+  }
+
+  @Delete(':id')
+  async deleteUser(@Param('id') id: string, @Req() req) {
+    const userId = parseInt(id, 10);
+
+    return this.userService.deleteUser(userId);
+  }
+
+  @Get('users')
+  async getAllUsers() {
+    return this.userService.getAllUsers();
   }
 
   @Post('login')

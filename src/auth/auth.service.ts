@@ -20,5 +20,15 @@ export class AuthService {
     const payload = { email: user.email, sub: user.id };
     return { access_token: this.jwtService.sign(payload) };
   }
+
+  async getUserFromToken(token: string) {
+    try {
+      const decoded = this.jwtService.verify(token); // 🔹 Decodifica o token
+      return await this.userService.getUserProfile(decoded.sub); // 🔹 Puxa o usuário pelo ID
+    } catch (error) {
+      throw new UnauthorizedException('Token inválido ou expirado');
+    }
+  }
+  
 }
 
