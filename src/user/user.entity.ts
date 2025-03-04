@@ -1,4 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import { Quizz } from '../quizz/quizz.entity'; // Importando Quizz
 
 @Entity()
 export class User {
@@ -13,4 +14,7 @@ export class User {
 
   @Column()
   password: string;
+
+  @OneToMany(() => Quizz, (quizz) => quizz.user)
+  quizzes: Quizz[]; // Relacionamento com os quizzes criados pelo usuário
 }
