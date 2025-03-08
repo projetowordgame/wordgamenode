@@ -13,6 +13,6 @@ export class Question {
   @ManyToOne(() => Quizz, (quizz) => quizz.questions, { onDelete: 'CASCADE' })
   quizz: Quizz; // A qual quiz essa pergunta pertence
 
-  @OneToMany(() => Answer, (answer) => answer.question, { cascade: true })
+  @OneToMany(() => Answer, (answer) => answer.question, { cascade: true, onDelete: 'CASCADE' })
   answers: Answer[];
 }

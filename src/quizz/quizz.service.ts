@@ -65,4 +65,15 @@ export class QuizzService {
   }
   
 
+  async deleteQuizz(id: number): Promise<{ message: string }> {
+    const result = await this.quizzRepo.delete(id);
+
+    if (result.affected === 0) {
+      throw new Error('Quiz não encontrado.');
+    }
+
+    return { message: 'Quiz deletado com sucesso.' };
+  }
+
+
 }

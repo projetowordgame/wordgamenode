@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Param, Body } from '@nestjs/common';
+import { Controller, Post, Get, Param, Body, Delete } from '@nestjs/common';
 import { QuizzService } from './quizz.service';
 
 @Controller('quizzes')
@@ -27,5 +27,11 @@ export class QuizzController {
   async getQuizzById(@Param('id') id: number) {
     return this.quizzService.getQuizzById(id);
   }
+
+  @Delete(':id')
+  async deleteQuizz(@Param('id') id: number) {
+    return this.quizzService.deleteQuizz(id);
+  }
+
 }
 

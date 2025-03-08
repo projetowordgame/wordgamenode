@@ -13,6 +13,6 @@ export class Quizz {
   @ManyToOne(() => User, (user) => user.quizzes, { onDelete: 'CASCADE' })
   user: User; // Dono do quiz
 
-  @OneToMany(() => Question, (question) => question.quizz, { cascade: true })
+  @OneToMany(() => Question, (question) => question.quizz, { cascade: true, onDelete: 'CASCADE' })
   questions: Question[];
 }
