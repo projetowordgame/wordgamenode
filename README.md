@@ -1,3 +1,85 @@
+## Dependencias - O que Instalar Antes de baixar o projeto?
+
+1- Baixar o NodeJs e o NPM:
+
+Baixar no site: https://nodejs.org/pt (Ja vem com o NPM junto)
+
+Apos baixar verifique a versão do Node e do Npm, no Prompt de comando rode:
+node -v
+npm -v
+
+
+2- Baixar o MySql e instalar:
+
+* Baixar o Mysql e intalar o executavel do site:
+https://dev.mysql.com/downloads/installer/
+
+* No passo de configuração, defina:
+
+MySQL Installer for Windows (versão completa, pois já inclui o MySQL Server e Workbench).
+
+    Modo de autenticação: Deixe "Use Strong Password Encryption".
+    Usuário root: Crie o usuario admin e a senha admin123( ou mantenha root e lembre-se da senha)
+    Porta: Deixe 3306 (ou escolha outra e lembre-se dela).
+    Criação de um novo usuário: Opcional, nao precisa
+    Finalize a instalação.
+
+* Inicie o MySQL Workbench(programa)
+   Clique no ícone de nova conexão e use:
+    Host: localhost
+    Usuário: root (ou outro que criou)
+    Senha: (aquela definida na instalação)
+    Conecte-se e pronto!
+
+* Crie a tabela(Schema) no banco, que é usada pelo Nodejs:
+
+  Entre na conexão que você criou no MySql Workbench
+  Clique no simbolo de "New Schema" e coloque o nome word_game e clique em apply
+
+Pronto, seu banco de dados Mysql está configurado para o projeto WordGame
+
+
+## Instalação do projeto
+
+1- Crie uma pasta onde você deseja baixar o projeto, pode ser o nome "Wordgame backend Node"
+
+2- Dentro da pasta, abra o prompt de comando e rode: git clone https://github.com/projetowordgame/wordgamenode.git
+
+3- Depois, entre na pasta desses arquivos baixados e rode o comando: npm install
+
+4- Ainda dentro das pastas dos arquivos, crie o arquivo de nome: .env , ele é um arquivo de texto que contem algumas variaveis de conexão.
+
+Adicione as variaveis nesse arquivo .env:
+
+DB_HOST=localhost
+DB_PORT=3306
+DB_USER=admin
+DB_PASSWORD=admin123
+DB_NAME=word_game
+
+
+--Pronto, seu backend Nodejs(com framework NestJs) está configurado.---
+
+Para rodar o backend, entre na pasta do projeto e rode: npm run start
+
+para sair, use o "Control+c" 
+
+O ambiente Backend usa a porta 3000, portanto, para consultar as APIS é nessa porta
+
+exemplo de consulta de usuarios:
+http://localhost:3000/auth/users
+
+
+## Ferramentas auxiliares para ajudar no desenvolvimento
+
+1- Visual Studio Code: IDE para ajudar a abrir o codigo, modificar e salvar.
+
+2- Postman: ferramenta para testar APIs criadas(opção online ou baixar)
+
+
+
+## Documentação do framework NestJs:
+
 <p align="center">
   <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
 </p>
