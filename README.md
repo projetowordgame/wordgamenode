@@ -1,22 +1,23 @@
 ## Dependencias - O que Instalar Antes de baixar o projeto?
 
-1- Baixar o NodeJs e o NPM:
+**1- Baixar o NodeJs e o NPM:**
 
 Baixar no site: https://nodejs.org/pt (Ja vem com o NPM junto)
 
 Apos baixar verifique a versão do Node e do Npm, no Prompt de comando rode:
-node -v
-npm -v
+* node -v
+
+* npm -v
 
 
-2- Baixar o MySql e instalar:
+**2- Baixar o MySql e instalar:**
 
 * Baixar o Mysql e intalar o executavel do site:
 https://dev.mysql.com/downloads/installer/
 
 * No passo de configuração, defina:
 
-MySQL Installer for Windows (versão completa, pois já inclui o MySQL Server e Workbench).
+  MySQL Installer for Windows (versão completa, pois já inclui o MySQL Server e Workbench).
 
     Modo de autenticação: Deixe "Use Strong Password Encryption".
     Usuário root: Crie o usuario admin e a senha admin123( ou mantenha root e lembre-se da senha)
@@ -36,7 +37,7 @@ MySQL Installer for Windows (versão completa, pois já inclui o MySQL Server e 
   Entre na conexão que você criou no MySql Workbench
   Clique no simbolo de "New Schema" e coloque o nome word_game e clique em apply
 
-Pronto, seu banco de dados Mysql está configurado para o projeto WordGame
+Pronto, seu banco de dados Mysql está configurado para o projeto WordGame.
 
 
 ## Instalação do projeto
@@ -51,11 +52,11 @@ Pronto, seu banco de dados Mysql está configurado para o projeto WordGame
 
 Adicione as variaveis nesse arquivo .env:
 
-DB_HOST=localhost
-DB_PORT=3306
-DB_USER=admin
-DB_PASSWORD=admin123
-DB_NAME=word_game
+DB_HOST=localhost  
+DB_PORT=3306  
+DB_USER=admin  
+DB_PASSWORD=admin123  
+DB_NAME=word_game  
 
 
 --Pronto, seu backend Nodejs(com framework NestJs) está configurado.---
@@ -78,7 +79,7 @@ http://localhost:3000/auth/users
 
 
 
-## Documentação do framework NestJs:
+## Documentação do framework NestJs(padrão) para estudo depois:
 
 <p align="center">
   <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
