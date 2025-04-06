@@ -32,7 +32,7 @@ export class UserService {
   async getUserProfile(userId: number) {
     const user = await this.userRepo.findOne({
       where: { id: userId },
-      select: ['id', 'name', 'email'], // 🔹 Evita retornar a senha
+      select: ['id', 'name', 'email', 'role'], // 🔹 Evita retornar a senha
     });
   
     if (!user) {
@@ -55,7 +55,14 @@ export class UserService {
 
   async getAllUsers() {
     return this.userRepo.find({
-      select: ['id', 'name', 'email'], // Evita expor senhas
+      select: ['id', 'name', 'email', 'role'], // Evita expor senhas
+    });
+  }
+
+  async getAllTeachers() {
+    return this.userRepo.find({
+      where: { role: "professor" },
+      select: ["id", "role", "name"],
     });
   }
 

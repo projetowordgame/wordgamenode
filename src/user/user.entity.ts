@@ -15,6 +15,9 @@ export class User {
   @Column()
   password: string;
 
+  @Column({ default: 'aluno' }) // 🔹 Define aluno como padrão
+  role: 'professor' | 'aluno'; // 🔹 Define o tipo de usuário
+
   @OneToMany(() => Quizz, (quizz) => quizz.user)
   quizzes: Quizz[]; // Relacionamento com os quizzes criados pelo usuário
 }

@@ -35,6 +35,12 @@ export class AuthController {
     return this.userService.getAllUsers();
   }
 
+  @Get('teachers')
+  async getAllTeachers() {
+    return this.userService.getAllTeachers();
+  }
+
+
   @Post('login')
   async login(@Body() body: { email: string; password: string }) {
     return this.authService.login(body.email, body.password);
