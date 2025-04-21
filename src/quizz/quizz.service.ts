@@ -96,18 +96,6 @@ export class QuizzService {
   }
 
 
-  // async saveScore(userId: number, quizzId: number, correctAnswers: number) {
-  //   const score = this.scoreRepo.create({ userId, quizzId, correctAnswers });
-  //   return this.scoreRepo.save(score);
-  // }
-  
-  // async getRankingByQuizz(quizzId: number) {
-  //   return this.scoreRepo.find({
-  //     where: { quizzId },
-  //     order: { correctAnswers: 'DESC' },
-  //   });
-  // }
-  
   async getRankingByQuizz(quizzId: number) {
     return this.scoreRepo
       .createQueryBuilder('score')

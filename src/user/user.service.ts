@@ -8,9 +8,9 @@ import { User } from './user.entity';
 export class UserService {
   constructor(@InjectRepository(User) private userRepo: Repository<User>) {}
 
-  async createUser(name: string, email: string, password: string) {
+  async createUser(name: string, email: string, password: string, role) {
     const hashedPassword = await bcrypt.hash(password, 10);
-    const user = this.userRepo.create({ name, email, password: hashedPassword });
+    const user = this.userRepo.create({ name, email, password: hashedPassword, role });
     return this.userRepo.save(user);
   }
 
@@ -62,7 +62,14 @@ export class UserService {
   async getAllTeachers() {
     return this.userRepo.find({
       where: { role: "professor" },
-      select: ["id", "role", "name"],
+      select: ["id", "email", "role", "name"],
+    });
+  }
+
+  async getAllStudents() {
+    return this.userRepo.find({
+      where: { role: "aluno" },
+      select: ["id", "email", "role", "name"],
     });
   }
 

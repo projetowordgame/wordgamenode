@@ -8,8 +8,8 @@ export class AuthController {
   constructor(private authService: AuthService, private userService: UserService) {}
 
   @Post('register')
-  async register(@Body() body: { name: string, email: string; password: string }) {
-    return this.userService.createUser(body.name, body.email, body.password);
+  async register(@Body() body: { name: string, email: string; password: string; role: string }) {
+    return this.userService.createUser(body.name, body.email, body.password, body.role);
   }
 
   @Put('update')
@@ -38,6 +38,11 @@ export class AuthController {
   @Get('teachers')
   async getAllTeachers() {
     return this.userService.getAllTeachers();
+  }
+
+  @Get('students')
+  async getAllStudents() {
+    return this.userService.getAllStudents();
   }
 
 

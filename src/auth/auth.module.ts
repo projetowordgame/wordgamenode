@@ -11,7 +11,7 @@ import { PassportModule } from '@nestjs/passport';
     PassportModule,
     JwtModule.register({
       secret: 'wordgame', //colocar em um .env esse token e chamar aqui
-      signOptions: { expiresIn: '1h' }, //colocar em um .env esse tempo e chamar aqui
+      signOptions: { expiresIn: '5h' }, //colocar em um .env esse tempo e chamar aqui
     }),
   ],
   providers: [AuthService],
