@@ -5,16 +5,16 @@ export class Score {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ type: 'int' })
   userId: number;
 
-  @Column()
+  @Column({ type: 'int' })
   quizzId: number;
 
-  @Column()
+  @Column({ type: 'int' })
   correctAnswers: number;
 
-  @Column()
+  @Column({ type: 'int' })
   timeInSeconds: number; // Tempo total do quiz em segundos
 }
 
