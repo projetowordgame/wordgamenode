@@ -1,5 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
 import { Quizz } from '../quizz/quizz.entity'; // Importando Quizz
+import { SequenceGame } from '../sequencegame/sequence-game.entity'; // Importando sequence game
 
 @Entity()
 export class User {
@@ -20,4 +21,7 @@ export class User {
 
   @OneToMany(() => Quizz, (quizz) => quizz.user)
   quizzes: Quizz[]; // Relacionamento com os quizzes criados pelo usuário
+
+  @OneToMany(() => SequenceGame, (game) => game.user)
+  sequenceGames: SequenceGame[];
 }
