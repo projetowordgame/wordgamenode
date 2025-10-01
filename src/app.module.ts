@@ -6,6 +6,7 @@ import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from './user/user.module';
 import { QuizzModule } from './quizz/quizz.module';
+import { SequenceGameModule } from './sequencegame/sequence-game.module';
 
 
 @Module({
@@ -22,7 +23,8 @@ import { QuizzModule } from './quizz/quizz.module';
     }),
     AuthModule,
     UserModule,
-    QuizzModule
+    QuizzModule,
+    SequenceGameModule
   ],
   controllers: [AppController],
   providers: [AppService],
