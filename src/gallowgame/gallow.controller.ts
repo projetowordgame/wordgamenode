@@ -15,8 +15,8 @@ export class GallowController {
   constructor(private readonly gameService: GallowService) {}
 
   @Post()
-  create(@Body() body: { title: string; keyword: string; tip1: string; tip2: string }): Promise<GallowGame> {
-    return this.gameService.create(body.title, body.keyword, body.tip1, body.tip2);
+  create(@Body() body: { userId:number; title: string; keyword: string; tip1: string; tip2: string }): Promise<GallowGame> {
+    return this.gameService.create(body.userId, body.title, body.keyword, body.tip1, body.tip2);
   }
 
   @Get('freegallow')
@@ -44,12 +44,12 @@ export class GallowController {
     return this.gameService.remove(id);
   }
 
-  @Post('ranking/:sequenceId')
+  @Post('ranking/:gallowId')
   async updateScore(
-    @Param('sequenceId') sequenceId: number,
+    @Param('gallowId') gallowId: number,
     @Body() body: { userId: number; correctAnswers: number; timeInSeconds: number },
     ) {
-      return this.gameService.saveOrUpdateScore(body.userId, sequenceId, body.correctAnswers,body.timeInSeconds);
+      return this.gameService.saveOrUpdateScore(body.userId, gallowId, body.correctAnswers,body.timeInSeconds);
     }
 
   @Get('ranking/:id')

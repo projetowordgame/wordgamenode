@@ -1,49 +1,45 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { SequenceGame } from './sequence-game.entity';
-import { SequenceCard } from './sequence-card.entity';
-import { CreateSequenceGameDto } from './dto/create-sequence-game.dto';
+import { GallowGame } from './gallow.entity';
 import { User } from '../user/user.entity';
-import { sequenceScore } from './sequenceScore.entity';
+import { gallowScore } from './gallowScore.entity';
 
 @Injectable()
 export class GallowService {
   constructor(
-    @InjectRepository(SequenceGame)
-    private readonly gameRepo: Repository<SequenceGame>,
-
-    @InjectRepository(SequenceCard)
-    private readonly cardRepo: Repository<SequenceCard>,
+    @InjectRepository(GallowGame)
+    private readonly gameRepo: Repository<GallowGame>,
 
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,
 
-    @InjectRepository(sequenceScore) private scoreRepo: Repository<sequenceScore>,
+    @InjectRepository(gallowScore) private scoreRepo: Repository<gallowScore>,
   ) {}
 
-  async create( title: string, keyword: string, tip1: string, tip2: string): Promise<SequenceGame> {
-    const user = await this.userRepo.findOne({ where: { id: dto.userId } });
-    if (!user) throw new NotFoundException(`User #${dto.userId} not found`);
+  async create( userId: number, title: string, keyword: string, tip1: string, tip2: string): Promise<GallowGame> {
+    const user = await this.userRepo.findOne({ where: { id: userId } });
+    if (!user) throw new Error('Usuário não encontrado');
 
     const game = this.gameRepo.create({
-      title: dto.title,
-      introduction_text: dto.introduction_text,
+      title: title,
+      keyword: keyword,
+      tip1: tip1,
+      tip2: tip2,
       user, // associa ao usuário encontrado
-      cards: dto.cards.map((card) => this.cardRepo.create(card)),
     });
 
     return this.gameRepo.save(game);
   }
 
-  async findAll(): Promise<SequenceGame[]> {
-    return this.gameRepo.find({ relations: ['cards', 'user'] });
+  async findAll(): Promise<GallowGame[]> {
+    return this.gameRepo.find({ relations: ['user'] });
   }
 
-  async findOne(id: number): Promise<SequenceGame> {
+  async findOne(id: number): Promise<GallowGame> {
     const game = await this.gameRepo.findOne({
       where: { id },
-      relations: ['cards', 'user'],
+      relations: ['user'],
     });
     if (!game) throw new NotFoundException(`Game #${id} not found`);
     return game;
@@ -54,7 +50,7 @@ export class GallowService {
     await this.gameRepo.remove(game);
   }
 
-  async findByUser(userId: number): Promise<SequenceGame[]> {
+  async findByUser(userId: number): Promise<GallowGame[]> {
     return this.gameRepo.find({
         where: { user: { id: userId } },
         relations: ['cards', 'user'],
@@ -68,10 +64,10 @@ export class GallowService {
       });
   }
 
-    async saveOrUpdateScore(userId: number, sequenceId: number, correctAnswers: number, timeInSeconds: number) {
+    async saveOrUpdateScore(userId: number, gallowId: number, correctAnswers: number, timeInSeconds: number) {
     // Verifica se já existe score para esse usuário e sequence
     const existingScore = await this.scoreRepo.findOne({
-      where: { userId, sequenceId },
+      where: { userId, gallowId },
     });
   
     if (existingScore) {
@@ -84,7 +80,7 @@ export class GallowService {
     // Cria novo score se não existir
     const newScore = this.scoreRepo.create({
       userId,
-      sequenceId,
+      gallowId,
       correctAnswers,
       timeInSeconds
     });
