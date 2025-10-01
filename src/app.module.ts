@@ -7,6 +7,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from './user/user.module';
 import { QuizzModule } from './quizz/quizz.module';
 import { SequenceGameModule } from './sequencegame/sequence-game.module';
+import { GallowModule } from './gallowgame/gallow.module'
 
 
 @Module({
@@ -24,7 +25,8 @@ import { SequenceGameModule } from './sequencegame/sequence-game.module';
     AuthModule,
     UserModule,
     QuizzModule,
-    SequenceGameModule
+    SequenceGameModule,
+    GallowModule
   ],
   controllers: [AppController],
   providers: [AppService],
