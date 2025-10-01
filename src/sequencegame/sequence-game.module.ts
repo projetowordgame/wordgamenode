@@ -5,9 +5,10 @@ import { SequenceCard } from './sequence-card.entity';
 import { SequenceGameService } from './sequence-game.service';
 import { SequenceGameController } from './sequence-game.controller';
 import { User } from '../user/user.entity';
+import { sequenceScore } from './sequenceScore.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([SequenceGame, SequenceCard, User])],
+  imports: [TypeOrmModule.forFeature([SequenceGame, SequenceCard, User, sequenceScore])],
   controllers: [SequenceGameController],
   providers: [SequenceGameService],
 })

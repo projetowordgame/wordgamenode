@@ -8,7 +8,7 @@ import { User } from '../user/user.entity';
 import { sequenceScore } from './sequenceScore.entity';
 
 @Injectable()
-export class SequenceGameService {
+export class GallowService {
   constructor(
     @InjectRepository(SequenceGame)
     private readonly gameRepo: Repository<SequenceGame>,
@@ -22,7 +22,7 @@ export class SequenceGameService {
     @InjectRepository(sequenceScore) private scoreRepo: Repository<sequenceScore>,
   ) {}
 
-  async create(dto: CreateSequenceGameDto): Promise<SequenceGame> {
+  async create( title: string, keyword: string, tip1: string, tip2: string): Promise<SequenceGame> {
     const user = await this.userRepo.findOne({ where: { id: dto.userId } });
     if (!user) throw new NotFoundException(`User #${dto.userId} not found`);
 

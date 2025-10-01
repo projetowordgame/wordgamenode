@@ -7,36 +7,35 @@ import {
   Body,
   ParseIntPipe,
 } from '@nestjs/common';
-import { SequenceGameService } from './sequence-game.service';
-import { CreateSequenceGameDto } from './dto/create-sequence-game.dto';
-import { SequenceGame } from './sequence-game.entity';
+import { GallowService } from './gallow.service';
+import { GallowGame } from './gallow.entity';
 
-@Controller('sequence-games')
-export class SequenceGameController {
-  constructor(private readonly gameService: SequenceGameService) {}
+@Controller('gallow')
+export class GallowController {
+  constructor(private readonly gameService: GallowService) {}
 
   @Post()
-  create(@Body() dto: CreateSequenceGameDto): Promise<SequenceGame> {
-    return this.gameService.create(dto);
+  create(@Body() body: { title: string; keyword: string; tip1: string; tip2: string }): Promise<GallowGame> {
+    return this.gameService.create(body.title, body.keyword, body.tip1, body.tip2);
   }
 
-  @Get('freesequence')
-  async getAllFreeSequences() {
+  @Get('freegallow')
+  async getAllFreeGallow() {
     return await this.gameService.getAllAdminFreeSequence();
   }
 
   @Get()
-  findAll(): Promise<SequenceGame[]> {
+  findAll(): Promise<GallowGame[]> {
     return this.gameService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id: number): Promise<SequenceGame> {
+  findOne(@Param('id', ParseIntPipe) id: number): Promise<GallowGame> {
     return this.gameService.findOne(id);
   }
 
   @Get('user/:userId')
-  findByUser(@Param('userId', ParseIntPipe) userId: number): Promise<SequenceGame[]> {
+  findByUser(@Param('userId', ParseIntPipe) userId: number): Promise<GallowGame[]> {
     return this.gameService.findByUser(userId);
   }
 
