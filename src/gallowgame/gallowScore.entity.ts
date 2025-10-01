@@ -1,7 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 
 @Entity()
-export class Score {
+export class gallowScore {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -9,7 +9,7 @@ export class Score {
   userId: number;
 
   @Column({ type: 'int' })
-  quizzId: number;
+  gallowId: number;
 
   @Column({ type: 'int' })
   correctAnswers: number;
@@ -17,4 +17,3 @@ export class Score {
   @Column({ type: 'int' })
   timeInSeconds: number; // Tempo total do quiz em segundos
 }
-
