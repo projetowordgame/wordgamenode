@@ -53,14 +53,14 @@ export class GallowService {
   async findByUser(userId: number): Promise<GallowGame[]> {
     return this.gameRepo.find({
         where: { user: { id: userId } },
-        relations: ['cards', 'user'],
+        relations: ['user'],
     });
   }
 
   async getAllAdminFreeSequence() {
       return this.gameRepo.find({
         where: { user: { name: "admin" } },
-        relations: ["user", "cards"],
+        relations: ["user"],
       });
   }
 
@@ -88,7 +88,7 @@ export class GallowService {
     return this.scoreRepo.save(newScore);
   }
 
-    async getRankingBySequence(sequenceId: number) {
+    async getRankingBySequence(gallowId: number) {
     return this.scoreRepo
       .createQueryBuilder('score')
       .innerJoin('user', 'user', 'user.id = score.userId')
@@ -99,7 +99,7 @@ export class GallowService {
         'user.id AS userId',
         'user.name AS userName',
       ])
-      .where('score.sequenceId = :sequenceId', { sequenceId })
+      .where('score.gallowId = :gallowId', { gallowId })
       .orderBy('score.correctAnswers', 'DESC')  // primeiro critério: acertos
       .addOrderBy('score.timeInSeconds', 'ASC') // segundo critério: menor tempo
       .getRawMany();
