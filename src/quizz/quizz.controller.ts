@@ -26,7 +26,30 @@ export class QuizzController {
     return this.quizzService.saveOrUpdateScore(body.userId, quizzId, body.correctAnswers,body.timeInSeconds);
   }
 
+  /**
+   * Endpoint para salvar as respostas detalhadas do usuário em um quizz
+   * Body esperado: { userAnswers: [{ questionId, answerId, isCorrect, timeSpentInSeconds }] }
+   */
+  @Post(':quizzId/user-answers/:userId')
+  async saveUserAnswers(
+    @Param('quizzId') quizzId: number,
+    @Param('userId') userId: number,
+    @Body() body: { userAnswers: { questionId: number; answerId: number; isCorrect: boolean; timeSpentInSeconds?: number }[] },
+  ) {
+    return this.quizzService.saveUserAnswers(userId, quizzId, body.userAnswers);
+  }
 
+  /**
+   * Endpoint para obter análise completa das respostas de um aluno em um quizz
+   * Retorna: playerName, totalCorrect, totalIncorrect, totalQuestions, timeInSeconds, questions
+   */
+  @Get('analytics/:quizzId/:userId')
+  async getQuizzAnalytics(
+    @Param('quizzId') quizzId: number,
+    @Param('userId') userId: number,
+  ) {
+    return this.quizzService.getQuizzAnalytics(quizzId, userId);
+  }
 
 
   @Get('ranking/:id')

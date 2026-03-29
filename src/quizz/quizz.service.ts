@@ -6,6 +6,7 @@ import { Question } from './question.entity';
 import { Answer } from './answer.entity';
 import { User } from '../user/user.entity';
 import { Score } from './score.entity';
+import { UserAnswer } from './user-answer.entity';
 
 @Injectable()
 export class QuizzService {
@@ -15,6 +16,7 @@ export class QuizzService {
     @InjectRepository(Answer) private answerRepo: Repository<Answer>,
     @InjectRepository(User) private userRepo: Repository<User>,
     @InjectRepository(Score) private scoreRepo: Repository<Score>,
+    @InjectRepository(UserAnswer) private userAnswerRepo: Repository<UserAnswer>,
   ) {}
 
   async createQuizz(userId: number, title: string, questions: { text: string; answers: { text: string; isCorrect: boolean }[] }[]) {
@@ -146,6 +148,124 @@ export class QuizzService {
     }
   
     return this.scoreRepo.remove(ranking);
+  }
+
+  /**
+   * Salva as respostas individuais do usuário para cada pergunta do quiz
+   * @param userId - ID do usuário
+   * @param quizzId - ID do quizz
+   * @param userAnswers - Array com as respostas do usuário
+   */
+  async saveUserAnswers(
+    userId: number,
+    quizzId: number,
+    userAnswers: {
+      questionId: number;
+      answerId: number;
+      isCorrect: boolean;
+      timeSpentInSeconds?: number;
+    }[]
+  ) {
+    const user = await this.userRepo.findOne({ where: { id: userId } });
+    const quizz = await this.quizzRepo.findOne({ where: { id: quizzId } });
+
+    if (!user || !quizz) {
+      throw new Error('Usuário ou Quizz não encontrado');
+    }
+
+    // Deleta respostas antigas (se o usuário respondeu novamente)
+    await this.userAnswerRepo.delete({ userId, quizzId });
+
+    // Salva as novas respostas
+    const answers = userAnswers.map((answer) => {
+      return this.userAnswerRepo.create({
+        userId,
+        quizzId,
+        questionId: answer.questionId,
+        answerId: answer.answerId,
+        isCorrect: answer.isCorrect,
+        timeSpentInSeconds: answer.timeSpentInSeconds || 0,
+        user,
+        quizz,
+      });
+    });
+
+    return this.userAnswerRepo.save(answers);
+  }
+
+  /**
+   * Retorna os dados analíticos de um aluno em um quizz específico
+   * @param quizzId - ID do quizz
+   * @param userId - ID do aluno
+   * @returns Objeto com análise completa das respostas
+   */
+  async getQuizzAnalytics(quizzId: number, userId: number) {
+    // Busca o usuário
+    const user = await this.userRepo.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new Error('Usuário não encontrado');
+    }
+
+    // Busca o quizz com todas as perguntas e respostas
+    const quizz = await this.quizzRepo.findOne({
+      where: { id: quizzId },
+      relations: ['questions', 'questions.answers'],
+    });
+
+    if (!quizz) {
+      throw new Error('Quizz não encontrado');
+    }
+
+    // Busca a pontuação do usuário
+    const score = await this.scoreRepo.findOne({
+      where: { userId, quizzId },
+    });
+
+    // Busca as respostas do usuário para cada pergunta
+    const userAnswers = await this.userAnswerRepo.find({
+      where: { userId, quizzId },
+      relations: ['answer', 'question'],
+    });
+
+    // Monta o array de perguntas com as respostas do usuário
+    const questionsWithAnswers = quizz.questions.map((question) => {
+      const userAnswer = userAnswers.find(
+        (ua) => ua.questionId === question.id
+      );
+
+      const userSelectedAnswer = userAnswer
+        ? question.answers.find((ans) => ans.id === userAnswer.answerId)
+        : null;
+
+      const correctAnswer = question.answers.find(
+        (ans) => ans.isCorrect === true
+      );
+
+      return {
+        questionId: question.id,
+        questionText: question.text,
+        userAnswerId: userAnswer?.answerId || null,
+        userAnswerText: userSelectedAnswer?.text || null,
+        isCorrect: userAnswer?.isCorrect || false,
+        correctAnswerId: correctAnswer?.id,
+        correctAnswerText: correctAnswer?.text,
+      };
+    });
+
+    // Calcula totais
+    const totalCorrect = score?.correctAnswers || 0;
+    const totalIncorrect = quizz.questions.length - totalCorrect;
+    const timeInSeconds = score?.timeInSeconds || 0;
+
+    return {
+      playerName: user.name,
+      playerId: user.id,
+      totalCorrect,
+      totalIncorrect,
+      totalQuestions: quizz.questions.length,
+      timeInSeconds,
+      questions: questionsWithAnswers,
+    };
   }
   
 

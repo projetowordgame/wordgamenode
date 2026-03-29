@@ -10,10 +10,11 @@ import { QuestionController } from './question.controller';
 import { User } from '../user/user.entity';
 import { AuthModule } from '../auth/auth.module'; // ✅ Importando AuthModule
 import { Score } from './score.entity';
+import { UserAnswer } from './user-answer.entity';
 
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Answer, Question, Quizz, User, Score]), AuthModule ],
+  imports: [TypeOrmModule.forFeature([Answer, Question, Quizz, User, Score, UserAnswer]), AuthModule ],
   providers: [QuestionService, QuizzService],
   controllers: [QuestionController, QuizzController],
   exports: [QuestionService, QuizzService],
