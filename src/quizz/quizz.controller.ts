@@ -51,6 +51,42 @@ export class QuizzController {
     return this.quizzService.getQuizzAnalytics(quizzId, userId);
   }
 
+  /**
+   * Endpoint para salvar ou atualizar dados de análise
+   * Limpa dados anteriores e salva os novos
+   */
+  @Post('analytics/:quizzId/:userId')
+  async saveOrUpdateAnalytics(
+    @Param('quizzId') quizzId: number,
+    @Param('userId') userId: number,
+  ) {
+    return this.quizzService.saveOrUpdateQuizzAnalytics(quizzId, userId);
+  }
+
+  /**
+   * Endpoint para obter todos os registros de análise
+   */
+  @Get('analytics')
+  async getAllAnalytics() {
+    return this.quizzService.getAllQuizzAnalytics();
+  }
+
+  /**
+   * Endpoint para obter análises de um quizz específico
+   */
+  @Get('analytics-by-quiz/:quizzId')
+  async getAnalyticsByQuizz(@Param('quizzId') quizzId: number) {
+    return this.quizzService.getAnalyticsByQuizz(quizzId);
+  }
+
+  /**
+   * Endpoint para obter análises de um aluno específico
+   */
+  @Get('analytics-by-user/:userId')
+  async getAnalyticsByUser(@Param('userId') userId: number) {
+    return this.quizzService.getAnalyticsByUser(userId);
+  }
+
 
   @Get('ranking/:id')
   getRanking(@Param('id') id: number) {

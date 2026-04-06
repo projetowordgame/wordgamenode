@@ -7,6 +7,7 @@ import { Answer } from './answer.entity';
 import { User } from '../user/user.entity';
 import { Score } from './score.entity';
 import { UserAnswer } from './user-answer.entity';
+import { QuizzAnalytics } from './quizz-analytics.entity';
 
 @Injectable()
 export class QuizzService {
@@ -17,6 +18,7 @@ export class QuizzService {
     @InjectRepository(User) private userRepo: Repository<User>,
     @InjectRepository(Score) private scoreRepo: Repository<Score>,
     @InjectRepository(UserAnswer) private userAnswerRepo: Repository<UserAnswer>,
+    @InjectRepository(QuizzAnalytics) private quizzAnalyticsRepo: Repository<QuizzAnalytics>,
   ) {}
 
   async createQuizz(userId: number, title: string, questions: { text: string; answers: { text: string; isCorrect: boolean }[] }[]) {
@@ -266,6 +268,75 @@ export class QuizzService {
       timeInSeconds,
       questions: questionsWithAnswers,
     };
+  }
+
+  /**
+   * Salva ou atualiza os dados de análise do aluno no quizz
+   * Limpa sempre que salva e atualiza com novos dados
+   * @param quizzId - ID do quizz
+   * @param userId - ID do aluno
+   * @returns Dados salvos
+   */
+  async saveOrUpdateQuizzAnalytics(quizzId: number, userId: number) {
+    // Primeiro, obtém os dados de análise do endpoint existente
+    const analyticsData = await this.getQuizzAnalytics(quizzId, userId);
+
+    if (!analyticsData) {
+      throw new Error('Não foi possível obter dados de análise');
+    }
+
+    // Delete existing analytics for this quiz and user (limpa dados anteriores)
+    await this.quizzAnalyticsRepo.delete({ userId, quizzId });
+
+    // Create new analytics record
+    const newAnalytics = this.quizzAnalyticsRepo.create({
+      playerName: analyticsData.playerName,
+      totalCorrect: analyticsData.totalCorrect,
+      totalIncorrect: analyticsData.totalIncorrect,
+      totalQuestions: analyticsData.totalQuestions,
+      timeInSeconds: analyticsData.timeInSeconds,
+      userId,
+      quizzId,
+    });
+
+    return this.quizzAnalyticsRepo.save(newAnalytics);
+  }
+
+  /**
+   * Obtém todos os registros de análise de quizzes
+   * @returns Array com todos os dados de análise salvos
+   */
+  async getAllQuizzAnalytics() {
+    return this.quizzAnalyticsRepo.find({
+      relations: ['user', 'quizz'],
+      order: { createdAt: 'DESC' },
+    });
+  }
+
+  /**
+   * Obtém os registros de análise de um quizz específico
+   * @param quizzId - ID do quizz
+   * @returns Array com análises do quizz
+   */
+  async getAnalyticsByQuizz(quizzId: number) {
+    return this.quizzAnalyticsRepo.find({
+      where: { quizzId },
+      relations: ['user', 'quizz'],
+      order: { createdAt: 'DESC' },
+    });
+  }
+
+  /**
+   * Obtém os registros de análise de um aluno
+   * @param userId - ID do aluno
+   * @returns Array com análises do aluno
+   */
+  async getAnalyticsByUser(userId: number) {
+    return this.quizzAnalyticsRepo.find({
+      where: { userId },
+      relations: ['user', 'quizz'],
+      order: { createdAt: 'DESC' },
+    });
   }
   
 
