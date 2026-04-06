@@ -34,8 +34,9 @@ export class QuizzController {
   async saveUserAnswers(
     @Param('quizzId') quizzId: number,
     @Param('userId') userId: number,
-    @Body() body: { userAnswers: { questionId: number; answerId: number; isCorrect: boolean; timeSpentInSeconds?: number }[] },
+    @Body() body: { userAnswers: { questionId: number; answerId: number; isCorrect?: boolean; timeSpentInSeconds?: number }[] },
   ) {
+    console.log(`Controller: saveUserAnswers called with ${body.userAnswers.length} answers`);
     return this.quizzService.saveUserAnswers(userId, quizzId, body.userAnswers);
   }
 
@@ -85,6 +86,22 @@ export class QuizzController {
   @Get('analytics-by-user/:userId')
   async getAnalyticsByUser(@Param('userId') userId: number) {
     return this.quizzService.getAnalyticsByUser(userId);
+  }
+
+  /**
+   * Endpoint para obter todas as perguntas erradas arquivadas
+   */
+  @Get('incorrect-questions')
+  async getAllIncorrectQuestions() {
+    return this.quizzService.getAllIncorrectQuestions();
+  }
+
+  /**
+   * Endpoint para obter as perguntas erradas de um registro de análise específico
+   */
+  @Get('incorrect-questions/:quizzAnalyticsId')
+  async getIncorrectQuestionsByAnalyticsId(@Param('quizzAnalyticsId') quizzAnalyticsId: number) {
+    return this.quizzService.getIncorrectQuestionsByAnalyticsId(quizzAnalyticsId);
   }
 
 

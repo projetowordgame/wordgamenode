@@ -8,6 +8,7 @@ import { User } from '../user/user.entity';
 import { Score } from './score.entity';
 import { UserAnswer } from './user-answer.entity';
 import { QuizzAnalytics } from './quizz-analytics.entity';
+import { QuizzAnalyticsIncorrectQuestion } from './quizz-analytics-incorrect-question.entity';
 
 @Injectable()
 export class QuizzService {
@@ -19,6 +20,7 @@ export class QuizzService {
     @InjectRepository(Score) private scoreRepo: Repository<Score>,
     @InjectRepository(UserAnswer) private userAnswerRepo: Repository<UserAnswer>,
     @InjectRepository(QuizzAnalytics) private quizzAnalyticsRepo: Repository<QuizzAnalytics>,
+    @InjectRepository(QuizzAnalyticsIncorrectQuestion) private quizzAnalyticsIncorrectQuestionsRepo: Repository<QuizzAnalyticsIncorrectQuestion>,
   ) {}
 
   async createQuizz(userId: number, title: string, questions: { text: string; answers: { text: string; isCorrect: boolean }[] }[]) {
@@ -164,10 +166,11 @@ export class QuizzService {
     userAnswers: {
       questionId: number;
       answerId: number;
-      isCorrect: boolean;
+      isCorrect?: boolean;
       timeSpentInSeconds?: number;
     }[]
   ) {
+
     const user = await this.userRepo.findOne({ where: { id: userId } });
     const quizz = await this.quizzRepo.findOne({ where: { id: quizzId } });
 
@@ -178,21 +181,29 @@ export class QuizzService {
     // Deleta respostas antigas (se o usuário respondeu novamente)
     await this.userAnswerRepo.delete({ userId, quizzId });
 
-    // Salva as novas respostas
-    const answers = userAnswers.map((answer) => {
-      return this.userAnswerRepo.create({
-        userId,
-        quizzId,
-        questionId: answer.questionId,
-        answerId: answer.answerId,
-        isCorrect: answer.isCorrect,
-        timeSpentInSeconds: answer.timeSpentInSeconds || 0,
-        user,
-        quizz,
-      });
-    });
+    // Salva as novas respostas, calculando isCorrect no backend
+    const answers = await Promise.all(
+      userAnswers.map(async (answer) => {
+        const selectedAnswer = await this.answerRepo.findOne({ where: { id: answer.answerId } });
+        if (!selectedAnswer) {
+          throw new Error(`Resposta com id ${answer.answerId} não encontrada`);
+        }
+       
+        return this.userAnswerRepo.create({
+          userId,
+          quizzId,
+          questionId: answer.questionId,
+          answerId: answer.answerId,
+          isCorrect: selectedAnswer.isCorrect,
+          timeSpentInSeconds: answer.timeSpentInSeconds || 0,
+          user,
+          quizz,
+        });
+      })
+    );
 
-    return this.userAnswerRepo.save(answers);
+    const saved = await this.userAnswerRepo.save(answers);
+    return saved;
   }
 
   /**
@@ -272,7 +283,8 @@ export class QuizzService {
 
   /**
    * Salva ou atualiza os dados de análise do aluno no quizz
-   * Limpa sempre que salva e atualiza com novos dados
+   * Limpa TODA a tabela e salva apenas o registro mais recente
+   * Perguntas incorretas são salvas em tabela separada
    * @param quizzId - ID do quizz
    * @param userId - ID do aluno
    * @returns Dados salvos
@@ -285,10 +297,12 @@ export class QuizzService {
       throw new Error('Não foi possível obter dados de análise');
     }
 
-    // Delete existing analytics for this quiz and user (limpa dados anteriores)
-    await this.quizzAnalyticsRepo.delete({ userId, quizzId });
+    // Delete ALL existing analytics (limpa tabela para manter apenas o mais recente)
+    await this.quizzAnalyticsRepo.delete({});
+    // Delete ALL existing incorrect questions
+    await this.quizzAnalyticsIncorrectQuestionsRepo.delete({});
 
-    // Create new analytics record
+    // Create new analytics record (sem o array)
     const newAnalytics = this.quizzAnalyticsRepo.create({
       playerName: analyticsData.playerName,
       totalCorrect: analyticsData.totalCorrect,
@@ -299,7 +313,49 @@ export class QuizzService {
       quizzId,
     });
 
-    return this.quizzAnalyticsRepo.save(newAnalytics);
+    const savedAnalytics = await this.quizzAnalyticsRepo.save(newAnalytics);
+
+    // Extrai e salva as perguntas que foram respondidas incorretamente em tabela separada
+    const incorrectQuestions = analyticsData.questions
+      .filter((q) => !q.isCorrect && q.userAnswerText !== null) // Apenas respondidas incorretamente
+      .map((q, idx) => ({
+        quizzAnalyticsId: savedAnalytics.id,
+        questionId: q.questionId,
+        questionText: q.questionText,
+        userAnswerText: q.userAnswerText!,
+        correctAnswerText: q.correctAnswerText || 'Sem resposta correta',
+        questionNumber: idx + 1,
+      }));
+
+    // Só salva perguntas erradas se houver alguma
+    if (incorrectQuestions.length > 0) {
+      await this.quizzAnalyticsIncorrectQuestionsRepo.insert(incorrectQuestions);
+    }
+
+    return savedAnalytics;
+  }
+
+  /**
+   * Obtém todas as perguntas erradas arquivadas
+   * @returns Array com todas as perguntas erradas
+   */
+  async getAllIncorrectQuestions() {
+    return this.quizzAnalyticsIncorrectQuestionsRepo.find({
+      relations: ['quizzAnalytics'],
+      order: { createdAt: 'DESC', questionNumber: 'ASC' },
+    });
+  }
+
+  /**
+   * Obtém as perguntas erradas de um registro de análise específico
+   * @param quizzAnalyticsId - ID do registro de análise
+   * @returns Array com perguntas erradas
+   */
+  async getIncorrectQuestionsByAnalyticsId(quizzAnalyticsId: number) {
+    return this.quizzAnalyticsIncorrectQuestionsRepo.find({
+      where: { quizzAnalyticsId },
+      order: { questionNumber: 'ASC' },
+    });
   }
 
   /**
