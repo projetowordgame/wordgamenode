@@ -89,6 +89,15 @@ export class QuizzController {
   }
 
   /**
+   * Endpoint para gerar relatório completo do quiz
+   * Limpa dados anteriores e salva análise de todos os alunos que fizeram o quiz
+   */
+  @Post('generate-report/:quizzId')
+  async generateQuizzReport(@Param('quizzId') quizzId: number) {
+    return this.quizzService.generateQuizzReport(quizzId);
+  }
+
+  /**
    * Endpoint para obter todas as perguntas erradas arquivadas
    */
   @Get('incorrect-questions')

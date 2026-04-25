@@ -336,6 +336,93 @@ export class QuizzService {
   }
 
   /**
+   * Gera relatório completo para um quiz
+   * Limpa dados anteriores de análise para o quiz e salva análise de todos os alunos que fizeram o quiz
+   * @param quizzId - ID do quizz
+   * @returns Array com as análises salvas de todos os alunos
+   */
+  async generateQuizzReport(quizzId: number) {
+    // Primeiro, obtém todos os registros de análise e perguntas incorretas deste quiz
+    const analyticsToDelete = await this.quizzAnalyticsRepo.find({
+      where: { quizzId },
+    });
+
+    // Deleta as perguntas incorretas associadas
+    for (const analytics of analyticsToDelete) {
+      await this.quizzAnalyticsIncorrectQuestionsRepo.delete({ quizzAnalyticsId: analytics.id });
+    }
+    
+    // Deleta os registros de análise
+    await this.quizzAnalyticsRepo.delete({ quizzId });
+
+    // Obtém todos os alunos que fizeram este quiz
+    const ranking = await this.getRankingByQuizz(quizzId);
+
+    if (!ranking || ranking.length === 0) {
+      throw new Error('Nenhum aluno jogou este quiz ainda');
+    }
+
+    // Salva análise para cada aluno
+    const savedAnalytics: QuizzAnalytics[] = [];
+    for (const record of ranking) {
+      try {
+        // Garante que temos um userId válido (com getRawMany, pode vir como userid em vez de userId)
+        const userId = parseInt(record.userId || record.userid);
+        
+        if (isNaN(userId)) {
+          console.error(`ID de usuário inválido para registro:`, record);
+          continue;
+        }
+
+        const analyticsData = await this.getQuizzAnalytics(quizzId, userId);
+        
+        if (!analyticsData) {
+          continue;
+        }
+
+        // Create new analytics record
+        const newAnalytics = this.quizzAnalyticsRepo.create({
+          playerName: analyticsData.playerName,
+          totalCorrect: analyticsData.totalCorrect,
+          totalIncorrect: analyticsData.totalIncorrect,
+          totalQuestions: analyticsData.totalQuestions,
+          timeInSeconds: analyticsData.timeInSeconds,
+          userId: userId,
+          quizzId,
+        });
+
+        const savedRecord = await this.quizzAnalyticsRepo.save(newAnalytics);
+
+        // Extrai e salva as perguntas que foram respondidas incorretamente
+        const incorrectQuestions = analyticsData.questions
+          .filter((q) => !q.isCorrect && q.userAnswerText !== null)
+          .map((q, idx) => ({
+            quizzAnalyticsId: savedRecord.id,
+            questionId: q.questionId,
+            questionText: q.questionText,
+            userAnswerText: q.userAnswerText!,
+            correctAnswerText: q.correctAnswerText || 'Sem resposta correta',
+            questionNumber: idx + 1,
+          }));
+
+        if (incorrectQuestions.length > 0) {
+          await this.quizzAnalyticsIncorrectQuestionsRepo.insert(incorrectQuestions);
+        }
+
+        savedAnalytics.push(savedRecord);
+      } catch (error) {
+        console.error(`Erro ao gerar análise para aluno:`, error);
+      }
+    }
+
+    if (savedAnalytics.length === 0) {
+      throw new Error('Não foi possível gerar relatório para nenhum aluno');
+    }
+
+    return savedAnalytics;
+  }
+
+  /**
    * Obtém todas as perguntas erradas arquivadas
    * @returns Array com todas as perguntas erradas
    */

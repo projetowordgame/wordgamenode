@@ -7,37 +7,37 @@ import { Quizz } from './quizz.entity';
 })
 export class QuizzAnalytics {
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;
 
   @Column()
-  playerName: string;
+  playerName!: string;
 
   @Column()
-  totalCorrect: number;
+  totalCorrect!: number;
 
   @Column()
-  totalIncorrect: number;
+  totalIncorrect!: number;
 
   @Column()
-  totalQuestions: number;
+  totalQuestions!: number;
 
   @Column()
-  timeInSeconds: number;
+  timeInSeconds!: number;
 
   @Column()
-  userId: number;
+  userId!: number;
 
   @Column()
-  quizzId: number;
+  quizzId!: number;
 
   @ManyToOne(() => User, { eager: true })
   @JoinColumn({ name: 'userId' })
-  user: User;
+  user!: User;
 
   @ManyToOne(() => Quizz, { eager: true })
   @JoinColumn({ name: 'quizzId' })
-  quizz: Quizz;
+  quizz!: Quizz;
 
   @CreateDateColumn()
-  createdAt: Date;
+  createdAt!: Date;
 }
